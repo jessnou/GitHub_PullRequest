@@ -1,0 +1,24 @@
+{
+  "name": "PullRequests",
+  "description": "Create PR",
+  "version": "1",
+  "manifest_version": 3,
+  "permissions": [
+    "tabs", "storage"
+  ],
+  "action": {
+    "default_title": "Github",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://github.com/CloudCrmWeb/*/pull/*"],
+      "js": ["git-hub-view.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}

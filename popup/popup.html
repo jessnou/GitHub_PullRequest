@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <title>GitHub PR</title>
+
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <link rel="stylesheet" href="popup.css">
+    </head>
+    <body>
+        <div class="p-3">
+            <div id="u" class="d-none">
+                <div class="d-flex justify-content-between align-items-center">
+                    GitHub PR
+
+                    <a href="#" class="text-dark" id="logout">Выйти</a>
+                </div>
+            </div>
+
+            <div id="a" class="d-none">
+                <form action="/" method="POST">
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин:</label>
+                        <input type="text" id="login" name="login" class="form-control" autocomplete="off" required="">
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Пароль:</label>
+                        <input type="password" id="password" name="password" class="form-control" autocomplete="off" required="">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" data-loading-text="...">Войти</button>
+                </form>
+            </div>
+        </div>
+        <script type="module" src="popup.js"></script>
+    </body>
+</html>
