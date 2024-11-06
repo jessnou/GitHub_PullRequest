@@ -141,25 +141,18 @@ function createOption(value, text) {
 }
 
 async function sendData(token, apiUrl, inMerge = false) {
-    console.log('hello')
     let selectedUser;
     if (!inMerge) {
-        console.log('hello2')
-        const selectedUser = employeeSelect.value;
+        selectedUser = employeeSelect.value;
 
         if (!selectedUser || Number(selectedUser) === 0) {
             alert('Пожалуйста, выберите сотрудника!');
             return;
         }
     }
-    console.log('hello3')
 
     const prTitle = document.querySelector('.js-issue-title')?.textContent.trim();
     const prUrl = window.location.href;
-
-    console.log('Название PR:', prTitle);
-    console.log('URL:', prUrl);
-    console.log('Выбранный сотрудник:', selectedUser);
 
     const formData = new FormData();
     formData.append('token', token);
