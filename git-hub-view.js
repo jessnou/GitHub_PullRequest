@@ -1,12 +1,33 @@
-let groupBtn = document.querySelector('.gh-header-actions');
+let groupBtn;
 let employeeSelect;
+let currentUrl;
 
-chrome.runtime.sendMessage(
-    {type: 'background:authorized'}, response => {
-        initiateAction();
+function start() {
+    const observer = new MutationObserver((mutationsList, observer) => {
+        groupBtn = document.querySelector('.gh-header-actions');
+
+        if (groupBtn) {
+            chrome.runtime.sendMessage(
+                {type: 'background:authorized'}, response => {
+                    initiateAction();
+                }
+            );
+            observer.disconnect()
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+/** У github PJAX или AJAX обновление без перезагрузки,
+ * потому нужен observer, чтобы отслеживать переход по вкладкам*/
+const observerUrl = new MutationObserver((mutations) => {
+    if (location.href.includes("/pull/") && location.href !== currentUrl) {
+        start()
     }
-);
+    currentUrl = location.href;
+});
 
+observerUrl.observe(document.body, { childList: true, subtree: true });
 
 async function initiateAction() {
     const token = await getToken();
@@ -16,6 +37,38 @@ async function initiateAction() {
         await createEmployeeSelect(token, apiUrl);
         await createSendBtn(token, apiUrl);
     }
+    const observer = new MutationObserver( (mutationsList, observer) => {
+        const initialButton = document.querySelector('.hx_create-pr-button');
+
+        if (initialButton) {
+            initialButton.addEventListener('click', function handleClick(event) {
+                initialButton.removeEventListener('click', handleClick);
+                let mergeButton = document.querySelector('.js-merge-commit-button');
+                if (mergeButton) {
+                    mergeButton.addEventListener('click', async function handleMergeClick(event) {
+                        await sendData(token, apiUrl, true)
+                        mergeButton.removeEventListener('click', handleMergeClick);
+                    });
+                } else {
+                    const mergeObserver = new MutationObserver((mutationsList, observer) => {
+                        const mergeButton = document.querySelector('.js-merge-commit-button');
+
+                        if (mergeButton) {
+                            mergeButton.addEventListener('click', async function handleMergeClick(event) {
+                                await sendData(token, apiUrl, true)
+                                mergeButton.removeEventListener('click', handleMergeClick);
+                            });
+                            observer.disconnect();
+                        }
+                    });
+                    mergeObserver.observe(document.body, { childList: true, subtree: true });
+                }
+            });
+            observer.disconnect();
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
 }
 
 async function getEmployees(token, apiUrl) {
@@ -30,7 +83,6 @@ async function getEmployees(token, apiUrl) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error(errorData);
             return null;
         }
 
@@ -88,13 +140,19 @@ function createOption(value, text) {
     return option;
 }
 
-async function sendData(token, apiUrl) {
-    const selectedUser = employeeSelect.value;
+async function sendData(token, apiUrl, inMerge = false) {
+    console.log('hello')
+    let selectedUser;
+    if (!inMerge) {
+        console.log('hello2')
+        const selectedUser = employeeSelect.value;
 
-    if (!selectedUser || Number(selectedUser) === 0) {
-        alert('Пожалуйста, выберите сотрудника!');
-        return;
+        if (!selectedUser || Number(selectedUser) === 0) {
+            alert('Пожалуйста, выберите сотрудника!');
+            return;
+        }
     }
+    console.log('hello3')
 
     const prTitle = document.querySelector('.js-issue-title')?.textContent.trim();
     const prUrl = window.location.href;
